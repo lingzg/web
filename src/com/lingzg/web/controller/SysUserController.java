@@ -9,6 +9,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.lingzg.web.annotation.Authorization;
+import com.lingzg.web.annotation.Log;
 import com.lingzg.web.base.BaseController;
 import com.lingzg.web.common.PageInfo;
 import com.lingzg.web.model.vo.SysUserVO;
@@ -36,6 +37,7 @@ public class SysUserController extends BaseController {
     }
     
 //    @Authorization
+    @Log("用户列表")
     @RequestMapping("/list")
     public String list(HttpServletRequest request, HttpServletResponse response, ModelMap model, SysUserVO vo){
         PageInfo page = userService.findPage(vo);
