@@ -23,6 +23,15 @@
 	<mvc:default-servlet-handler />
 	<!-- <mvc:resources mapping="/static/**" location="/static/" /> -->
 	
+	<bean id="mappingJacksonHttpMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"/>
+    <bean class ="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" >
+        <property name="messageConverters">  
+            <list>  
+                <ref bean="mappingJacksonHttpMessageConverter" /> 
+            </list>  
+        </property> 
+    </bean> 
+    
 	<!-- Resolves view names to protected .jsp resources within the /WEB-INF/views directory -->
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
