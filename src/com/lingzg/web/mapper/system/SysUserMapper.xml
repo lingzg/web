@@ -33,9 +33,9 @@
       where id=#{userId}
     </update>
     
-    <insert id="save" parameterType="com.lingzg.web.model.SysUser">
-    insert into t_base_user_info(id,user_name,nick_name,password)
-      values(#{userId},#{userName},#{nickName},#{password})
+    <insert id="save" parameterType="com.lingzg.web.model.SysUser" useGeneratedKeys="true" keyProperty="userId">
+    insert into t_base_user_info(user_name,nick_name,password)
+      values(#{userName},#{nickName},#{password})
     </insert>
     
     <delete id="delete" parameterType="String">
