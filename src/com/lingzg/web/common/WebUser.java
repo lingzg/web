@@ -10,6 +10,7 @@ public class WebUser {
 	private String account;
 	private String nickName;
 	private Set<String> permissions;
+	private Set<String> roles;
 	
 	public Long getUserId() {
 		return userId;
@@ -34,6 +35,12 @@ public class WebUser {
 	}
 	public void setPermissions(Set<String> permissions) {
 		this.permissions = permissions;
+	}
+	public Set<String> getRoles() {
+		return roles;
+	}
+	public void setRoles(Set<String> roles) {
+		this.roles = roles;
 	}
 	
 	public String toString(){

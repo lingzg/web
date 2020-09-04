@@ -35,6 +35,9 @@
 		  if(xhr.status==401){
 			  window.location.href='${contextPath}/login.jsp';
 		  }
+		  if(xhr.status==301){
+			  alert('没有操作权限，请联系管理员');
+		  }
 	  }
 	});
 	let pno=1;
