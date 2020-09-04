@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.alibaba.fastjson.JSONObject;
 import com.lingzg.web.annotation.Authorization;
+import com.lingzg.web.common.WebUser;
 
 @Component
 public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
@@ -32,21 +34,25 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 		}
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
 		Method method = handlerMethod.getMethod();
-		if (method.getAnnotation(Authorization.class) != null) {
+		Authorization auth;
+		if ((auth = method.getAnnotation(Authorization.class)) != null) {
 			// 注解拦截 token
 			try {
 				HttpSession session = request.getSession();
 				Object obj = session.getAttribute("user");
 				if (obj != null) {
-					return true;
-				} else {
-					String requestType = request.getHeader("X-Requested-With");
-					if ("XMLHttpRequest".equalsIgnoreCase(requestType)) {
-						response.addHeader("loginStatus", "accessDenied");
-						response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-					}else{
-					    response.sendRedirect(request.getContextPath()+"/login.jsp");
+					String perm = auth.perm();
+					WebUser user = (WebUser) obj;
+					if(StringUtils.isBlank(perm) || user.getPermissions().contains(perm)){
+						return true;
 					}
+				}
+				String requestType = request.getHeader("X-Requested-With");
+				if ("XMLHttpRequest".equalsIgnoreCase(requestType)) {
+					response.addHeader("loginStatus", "accessDenied");
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+				}else{
+					response.sendRedirect(request.getContextPath()+"/login.jsp");
 				}
 				return false;
 			} catch (Exception e) {
