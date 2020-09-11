@@ -13,10 +13,10 @@ import java.util.Date;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
-import org.apache.poi.hslf.HSLFSlideShow;
-import org.apache.poi.hslf.model.Slide;
-import org.apache.poi.hslf.model.TextRun;
-import org.apache.poi.hslf.usermodel.SlideShow;
+//import org.apache.poi.hslf.HSLFSlideShow;
+//import org.apache.poi.hslf.model.Slide;
+//import org.apache.poi.hslf.model.TextRun;
+//import org.apache.poi.hslf.usermodel.SlideShow;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -184,7 +184,7 @@ public class FilePreview {
 		try {
 			bis = new BufferedInputStream(in);
 			StringBuilder content = new StringBuilder("");
-			SlideShow ss = new SlideShow(new HSLFSlideShow(bis));
+			/*SlideShow ss = new SlideShow(new HSLFSlideShow(bis));
 			Slide[] slides = ss.getSlides();
 			for (int i = 0; i < slides.length; i++) {
 				TextRun[] t = slides[i].getTextRuns();
@@ -192,9 +192,9 @@ public class FilePreview {
 					content.append(t[j].getText());
 				}
 				content.append(slides[i].getTitle());
-			}
+			}*/
 			return content.toString();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		} finally {
