@@ -1,4 +1,4 @@
-package com.lingzg.web.util;
+package com.lingzg.web.util.file;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;

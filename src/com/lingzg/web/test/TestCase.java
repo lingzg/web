@@ -16,9 +16,9 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-import com.lingzg.web.util.Excel2HtmlUtil;
-import com.lingzg.web.util.FileConverter;
-import com.lingzg.web.util.Word2HtmlUtil;
+import com.lingzg.web.util.file.Excel2HtmlUtil;
+import com.lingzg.web.util.file.FileConverter;
+import com.lingzg.web.util.file.Word2HtmlUtil;
 
 public class TestCase {
 

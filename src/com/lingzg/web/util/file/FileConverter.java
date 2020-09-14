@@ -1,4 +1,4 @@
-package com.lingzg.web.util;
+package com.lingzg.web.util.file;
 
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.converter.PicturesManager;
