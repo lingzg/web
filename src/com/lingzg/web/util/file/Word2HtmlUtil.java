@@ -1,15 +1,12 @@
 package com.lingzg.web.util.file;
 
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -19,6 +16,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.converter.PicturesManager;
 import org.apache.poi.hwpf.converter.WordToHtmlConverter;
@@ -39,9 +37,10 @@ public class Word2HtmlUtil {
 	 * @param outPath 输出文件路径
 	 * @param outName 输出文件名
 	 */
-	public static void word2Html(String inFile, String outPath, String outName) throws Exception{
+	public static void word2Html(String inFile, String outPath) throws Exception{
 		FileInputStream fis=new FileInputStream(inFile);
 		String suffix=inFile.substring(inFile.lastIndexOf("."));
+		String outName = FileUtil.getFileName(inFile);
 		if (suffix.equalsIgnoreCase(".docx")) {
 			docx2Html(fis, outPath, outName);
 		} else {
@@ -53,15 +52,15 @@ public class Word2HtmlUtil {
 		// 加载word文档生成 XWPFDocument对象
 		XWPFDocument document = new XWPFDocument(fis);
 		// 解析 XHTML配置
-		String imageFolder = outPath + "images"+File.separator+"docx"+File.separator;//图片存放路径
+		String imageFolder = outPath + "/images/docx/"+outName+"/";//图片存放路径
 		File imageFolderFile = new File(imageFolder);
 		XHTMLOptions options = XHTMLOptions.create().URIResolver(new FileURIResolver(imageFolderFile));
 		options.setExtractor(new FileImageExtractor(imageFolderFile));
 		options.setIgnoreStylesIfUnused(false);
 		options.setFragment(true);
-		options.URIResolver(new BasicURIResolver("images/docx/"));//html中img的src前缀
+		options.URIResolver(new BasicURIResolver("images/docx/"+outName+"/"));//html中img的src前缀
 		// 将 XWPFDocument转换成XHTML
-		OutputStream out = new FileOutputStream(new File(outPath + outName));
+		OutputStream out = new FileOutputStream(new File(outPath + "/"+outName+".html"));
 		XHTMLConverter.getInstance().convert(document, out, options);
 	}
 	
@@ -70,7 +69,7 @@ public class Word2HtmlUtil {
 		WordToHtmlConverter wordToHtmlConverter = new WordToHtmlConverter(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
 		wordToHtmlConverter.setPicturesManager(new PicturesManager() {
 			public String savePicture(byte[] content, PictureType pictureType, String suggestedName, float widthInches, float heightInches) {
-				return "images/doc/" + suggestedName;// html中img的src值
+				return "images/doc/"+outName+"/" + suggestedName;// html中img的src值
 			}
 		});
 	    wordToHtmlConverter.processDocument(wordDocument);
@@ -80,7 +79,7 @@ public class Word2HtmlUtil {
 	        for (int i = 0; i < pics.size(); i++) {
 	            Picture pic = (Picture) pics.get(i);
 	            try {
-	            	String imageFolder = outPath + "images" + File.separator + "doc" + File.separator;
+	            	String imageFolder = outPath + "/images/doc/"+outName+"/";
 	            	File dir=new File(imageFolder);//图片保存路径
 	        		if(!dir.exists()) {
 	        			dir.mkdirs();
@@ -102,28 +101,7 @@ public class Word2HtmlUtil {
 	    serializer.setOutputProperty(OutputKeys.METHOD, "html");
 	    serializer.transform(domSource, streamResult);
 	    out.close();
-	    writeFile(new String(out.toByteArray()), outPath + outName);
+	    FileUtils.writeStringToFile(new File(outPath+"/"+ outName+".html"), new String(out.toByteArray()), "utf-8");
 	}
 	
-	public static void writeFile(String content, String path) {
-	    FileOutputStream fos = null;
-	    BufferedWriter bw = null;
-	    try {
-	        File file = new File(path);
-	        fos = new FileOutputStream(file);
-	        bw = new BufferedWriter(new OutputStreamWriter(fos, "utf-8"));
-	        bw.write(content);
-	    } catch (FileNotFoundException fnfe) {
-	        fnfe.printStackTrace();
-	    } catch (IOException ioe) {
-	        ioe.printStackTrace();
-	    } finally {
-	        try {
-	            if (bw != null)
-	                bw.close();
-	            if (fos != null)
-	                fos.close();
-	        } catch (IOException ie) {}
-	    }
-	}
 }

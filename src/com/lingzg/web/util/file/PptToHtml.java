@@ -32,11 +32,6 @@ public class PptToHtml {
 
 	private final static Logger log = Logger.getLogger(PptToHtml.class);
 
-	public static void main(String[] args) throws TransformerException {
-		ppt03ToHtml("d:/doc/测试.ppt","d:/doc/html");
-		ppt07ToHtml("d:/doc/工作总结暨工作计划PPT模板.pptx","d:/doc/html");
-	}
-
 	/**
 	 * ppt03转html 
 	 * fileName: ppt文件全路径名称
@@ -44,14 +39,11 @@ public class PptToHtml {
 	 */
 	public static void ppt03ToHtml(String fileName, String output) throws TransformerException {
 		try {
-			// 读入PPT文件
-			File file = new File(fileName);
 			FileUtil.fileExists(output);
-			FileUtil.fileExists(output + "/images");
-			String name = file.getName();
-			name = name.substring(0, name.lastIndexOf("."));
+			FileUtil.fileExists(output + "/images/ppt");
+			String name = FileUtil.getFileName(fileName);
 			String htmlname = name + ".html";
-			FileInputStream is = new FileInputStream(file);
+			FileInputStream is = new FileInputStream(fileName);
 			HSLFSlideShow ppt = new HSLFSlideShow(is);
 			is.close();
 			Dimension pgsize = ppt.getPageSize();
@@ -77,7 +69,7 @@ public class PptToHtml {
 				slide.draw(graphics);
 
 				// 这里设置图片的存放路径和图片的格式(jpeg,png,bmp等等),注意生成文件路径
-				String imgs = "images/" + name + "_" + (i + 1) + ".jpg";
+				String imgs = "images/ppt/" + name + "_" + (i + 1) + ".jpg";
 				FileOutputStream out = new FileOutputStream(output + "/" + imgs);
 				javax.imageio.ImageIO.write(img, "jpeg", out);
 				out.close();
@@ -102,14 +94,11 @@ public class PptToHtml {
 	 */
 	public static void ppt07ToHtml(String fileName, String output) throws TransformerException {
 		try {
-			// 读入PPT文件
-			File file = new File(fileName);
 			FileUtil.fileExists(output);
-			FileUtil.fileExists(output + "/images");
-			String name = file.getName();
-			name = name.substring(0, name.lastIndexOf("."));
+			FileUtil.fileExists(output + "/images/pptx");
+			String name = FileUtil.getFileName(fileName);
 			String htmlname = name + ".html";
-			FileInputStream is = new FileInputStream(file);
+			FileInputStream is = new FileInputStream(fileName);
 			XMLSlideShow ppt = new XMLSlideShow(is);
 			is.close();
 			Dimension pgsize = ppt.getPageSize();
@@ -136,7 +125,7 @@ public class PptToHtml {
 				// render
 				slide.draw(graphics);
 				
-				String imgs = "images/" + name + "_" + (i + 1) + ".jpg";
+				String imgs = "images/pptx/" + name + "_" + (i + 1) + ".jpg";
 				FileOutputStream out = new FileOutputStream(output + "/" + imgs);
 				javax.imageio.ImageIO.write(img, "jpeg", out);
 				out.close();

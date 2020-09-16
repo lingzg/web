@@ -2,16 +2,15 @@ package com.lingzg.web.util.file;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
@@ -33,6 +32,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class Excel2HtmlUtil {
 
+	private final static Logger log = Logger.getLogger(Excel2HtmlUtil.class);
+	
 	/**
 	 * @param filePath
 	 *            excel源文件文件的路径
@@ -42,93 +43,109 @@ public class Excel2HtmlUtil {
 	 *            是否需要表格样式 包含 字体 颜色 边框 对齐方式
 	 * 
 	 */
-	public static String readExcelToHtml(String filePath, String htmlPositon, boolean isWithStyle) {
-
-		InputStream is = null;
-		String htmlExcel = null;
-		try {
-			File sourcefile = new File(filePath);
-			is = new FileInputStream(sourcefile);
+	public static void readExcelToHtml(String filePath, String output) {
+		try (
+				InputStream is = new FileInputStream(filePath);
+			){
 			Workbook wb = WorkbookFactory.create(is);
+			String htmlExcel = "";
 			if (wb instanceof XSSFWorkbook) { // 版excel处理方法
 				XSSFWorkbook xWb = (XSSFWorkbook) wb;
-				htmlExcel = getExcelInfo(xWb, isWithStyle);
+				htmlExcel = getExcelInfo(xWb, true);
 			} else if (wb instanceof HSSFWorkbook) { // 07及10版以后的excel处理方法
 				HSSFWorkbook hWb = (HSSFWorkbook) wb;
-				htmlExcel = getExcelInfo(hWb, isWithStyle);
+				htmlExcel = getExcelInfo(hWb, true);
 			}
-			writeFile(htmlExcel, htmlPositon);
+			String htmlPositon = output +"/" + FileUtil.getFileName(filePath)+".html";
+			FileUtils.writeStringToFile(new File(htmlPositon), htmlExcel, "utf-8");
 		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				is.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			log.error(e.getMessage(), e);
 		}
-		return htmlPositon;
 	}
 
 	private static String getExcelInfo(Workbook wb, boolean isWithStyle) {
-
 		StringBuffer sb = new StringBuffer();
-		Sheet sheet = wb.getSheetAt(0);// 获取第一个Sheet的内容
-		int lastRowNum = sheet.getLastRowNum();
-		Map<String, String> map[] = getRowSpanColSpanMap(sheet);
-		sb.append("<table style='border-collapse:collapse;' width='100%'>");
-		Row row = null; // 兼容
-		Cell cell = null; // 兼容
-
-		for (int rowNum = sheet.getFirstRowNum(); rowNum <= lastRowNum; rowNum++) {
-			row = sheet.getRow(rowNum);
-			if (row == null) {
-				sb.append("<tr><td ><nobr> </nobr></td></tr>");
-				continue;
-			}
-			sb.append("<tr>");
-			int lastColNum = row.getLastCellNum();
-			for (int colNum = 0; colNum < lastColNum; colNum++) {
-				cell = row.getCell(colNum);
-				if (cell == null) { // 特殊情况 空白的单元格会返回null
-					sb.append("<td> </td>");
-					continue;
-				}
-
-				String stringValue = getCellValue(cell);
-				if (map[0].containsKey(rowNum + "," + colNum)) {
-					String pointString = map[0].get(rowNum + "," + colNum);
-					map[0].remove(rowNum + "," + colNum);
-					int bottomeRow = Integer.valueOf(pointString.split(",")[0]);
-					int bottomeCol = Integer.valueOf(pointString.split(",")[1]);
-					int rowSpan = bottomeRow - rowNum + 1;
-					int colSpan = bottomeCol - colNum + 1;
-					sb.append("<td rowspan= '" + rowSpan + "' colspan= '" + colSpan + "' ");
-				} else if (map[1].containsKey(rowNum + "," + colNum)) {
-					map[1].remove(rowNum + "," + colNum);
-					continue;
-				} else {
-					sb.append("<td ");
-				}
-
-				// 判断是否需要样式
-				if (isWithStyle) {
-					dealExcelStyle(wb, sheet, cell, sb);// 处理单元格样式
-				}
-
-				sb.append("><nobr>");
-				if (stringValue == null || "".equals(stringValue.trim())) {
-					sb.append("   ");
-				} else {
-					// 将ascii码为0的空格转换为html下的空格（ ）
-					sb.append(stringValue.replace(String.valueOf((char) 0), " "));
-				}
-				sb.append("</nobr></td>");
-			}
-			sb.append("</tr>");
+		sb.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UFT-8\"><title>Html Test</title></head>\r\n<style>");
+		sb.append(".tab {margin: 10px 0;text-align: left!important;}");
+		sb.append(".tab-title {position: relative;left: 0;height: 40px;white-space: nowrap;font-size: 0;border-bottom-width: 1px;border-bottom-style: solid;transition: all .2s;-webkit-transition: all .2s;}");
+		sb.append(".tab-title li {border-radius: 30px;border: 1px solid #1c76ff;height: 20px;line-height: 20px;padding: 0 20px;font-size: 12px;margin-right: 15px;display: inline-block;}");
+		sb.append(".tab-title li.tab-this {background-color: #1c76ff;color: #fff;}.tab-title li:hover{cursor:pointer}.hide{display:none;}");
+		sb.append("</style>\r\n<body>");
+		sb.append("<div class='tab'><ul class='tab-title'>");
+		int size = wb.getNumberOfSheets();
+		for(int i=0;i<size;i++){
+			String name = wb.getSheetName(i);
+			sb.append("<li id='li_").append(i).append("'").append(i==0?" class='tab-this'>":">").append(name).append("</li>");
 		}
-
-		sb.append("</table>");
+		sb.append("</ul></div>\r\n<div>");
+		for(int i=0;i<size;i++){
+			Sheet sheet = wb.getSheetAt(i);
+			int lastRowNum = sheet.getLastRowNum();
+			Map<String, String> map[] = getRowSpanColSpanMap(sheet);
+			sb.append("<table id='table_").append(i).append("'").append(i>0?" class='hide'":"").append(" style='border-collapse:collapse;' width='100%'>");
+			Row row = null; // 兼容
+			Cell cell = null; // 兼容
+			
+			for (int rowNum = sheet.getFirstRowNum(); rowNum <= lastRowNum; rowNum++) {
+				row = sheet.getRow(rowNum);
+				if (row == null) {
+					sb.append("<tr><td ><nobr> </nobr></td></tr>");
+					continue;
+				}
+				sb.append("<tr>");
+				int lastColNum = row.getLastCellNum();
+				for (int colNum = 0; colNum < lastColNum; colNum++) {
+					cell = row.getCell(colNum);
+					if (cell == null) { // 特殊情况 空白的单元格会返回null
+						sb.append("<td> </td>");
+						continue;
+					}
+					
+					String stringValue = getCellValue(cell);
+					if (map[0].containsKey(rowNum + "," + colNum)) {
+						String pointString = map[0].get(rowNum + "," + colNum);
+						map[0].remove(rowNum + "," + colNum);
+						int bottomeRow = Integer.valueOf(pointString.split(",")[0]);
+						int bottomeCol = Integer.valueOf(pointString.split(",")[1]);
+						int rowSpan = bottomeRow - rowNum + 1;
+						int colSpan = bottomeCol - colNum + 1;
+						sb.append("<td rowspan= '" + rowSpan + "' colspan= '" + colSpan + "' ");
+					} else if (map[1].containsKey(rowNum + "," + colNum)) {
+						map[1].remove(rowNum + "," + colNum);
+						continue;
+					} else {
+						sb.append("<td ");
+					}
+					
+					// 判断是否需要样式
+					if (isWithStyle) {
+						dealExcelStyle(wb, sheet, cell, sb);// 处理单元格样式
+					}
+					
+					sb.append("><nobr>");
+					if (stringValue == null || "".equals(stringValue.trim())) {
+						sb.append("   ");
+					} else {
+						// 将ascii码为0的空格转换为html下的空格（ ）
+						sb.append(stringValue.replace(String.valueOf((char) 0), " "));
+					}
+					sb.append("</nobr></td>");
+				}
+				sb.append("</tr>");
+			}
+			
+			sb.append("</table>\r\n");
+		}
+		sb.append("</div></body>\r\n<script>");
+		sb.append("var ul = document.querySelector('ul');");
+		sb.append("ul.addEventListener('click',function(event){");
+		sb.append("if(event.target.nodeName == 'LI'){");
+		sb.append("document.querySelector('.tab-this').className='';");
+		sb.append("event.target.className='tab-this';");
+		sb.append("var id = event.target.id.replace('li','table');");
+		sb.append("document.querySelector('table:not(.hide)').className='hide';");
+		sb.append("document.getElementById(id).className='';");
+		sb.append("} });</script>\r\n</html>");
 		return sb.toString();
 	}
 
@@ -396,32 +413,4 @@ public class Excel2HtmlUtil {
 		return "";
 	}
 
-	/*
-	 * @param content 生成的excel表格标签
-	 * 
-	 * @param htmlPath 生成的html文件地址
-	 */
-	private static void writeFile(String content, String htmlPath) {
-		File file2 = new File(htmlPath);
-		StringBuilder sb = new StringBuilder();
-		try {
-			file2.createNewFile();// 创建文件
-
-			sb.append(
-					"<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UFT-8\"><title>Html Test</title></head><body>");
-			sb.append("<div>");
-			sb.append(content);
-			sb.append("</div>");
-			sb.append("</body></html>");
-
-			PrintStream printStream = new PrintStream(new FileOutputStream(file2));
-
-			printStream.println(sb.toString());// 将字符串写入文件
-			printStream.close();
-		} catch (IOException e) {
-
-			e.printStackTrace();
-		}
-
-	}
 }
