@@ -48,4 +48,11 @@ public class FileController extends BaseController{
         }
         return data(res);
     }
+    
+    @RequestMapping("/preview")
+    public String preview(HttpServletRequest request, HttpServletResponse response){
+    	return "/preview";
+//    	return "redirect:http://127.0.0.1:8082/web/static/beb44bc483fd6c9ef12d42c82aefcd7b.mp4";
+//    	return "redirect:http://127.0.0.1:8082/web/static/test.avi";
+    }
 }

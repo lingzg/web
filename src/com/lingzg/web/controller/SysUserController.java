@@ -8,7 +8,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.lingzg.web.annotation.Authorization;
 import com.lingzg.web.annotation.Log;
 import com.lingzg.web.base.BaseController;
 import com.lingzg.web.common.PageInfo;
@@ -45,4 +44,5 @@ public class SysUserController extends BaseController {
         model.addAttribute("page", page);
         return "/system/table";
     }
+    
 }

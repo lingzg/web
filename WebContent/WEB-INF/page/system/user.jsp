@@ -40,7 +40,7 @@
 		  }
 	  }
 	});
-	let pno=1;
+	var pno=1;
 	//getPage(pno);
 	function getPage(pno){
 		$.get('${contextPath}/user/list',{pno:pno,nickName:'管理员'},function(res){
@@ -74,5 +74,18 @@ layui.use(['element','form','upload','layer','table','laydate'], function(){
     }
   });
 });
+var Sys = {};
+var ua = navigator.userAgent.toLowerCase();
+if (!!window.ActiveXObject || "ActiveXObject" in window)
+    Sys.ie = true;//ua.match(/msie ([\d.]+)/)[1];
+else if (document.getBoxObjectFor)
+    Sys.firefox = ua.match(/firefox\/([\d.]+)/)[1];
+else if (window.MessageEvent && !document.getBoxObjectFor)
+    Sys.chrome = ua.match(/chrome\/([\d.]+)/)[1];
+else if (window.opera)
+    Sys.opera = ua.match(/opera.([\d.]+)/)[1];
+else if (window.openDatabase)
+    Sys.safari = ua.match(/version\/([\d.]+)/)[1];
+console.log(Sys);
 </script>
 </html>
