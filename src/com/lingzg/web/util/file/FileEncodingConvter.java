@@ -29,7 +29,7 @@ public class FileEncodingConvter {
 	
 	public static void main(String[] args) throws IOException {
 		FileEncodingConvter util = new FileEncodingConvter();
-		File dir = new File("D:\\work\\workspace\\cecsys\\jakra-electricai-web\\src\\com\\cecsys\\electric");
+		File dir = new File("D:\\work\\workspace\\cecsys\\new-electricai-web-xjxc\\src\\com\\cecsys\\electric");
 		util.convter(dir);
 	}
 }
